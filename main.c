@@ -6,6 +6,92 @@ typedef struct pixel
     int R, G, B;
 } PIXEL;
 
+PIXEL **inverteCores(PIXEL **original, int linhas, int colunas, int maxValor);
+PIXEL **escalaCinza(PIXEL **original, int linhas, int colunas);
+int **borrar(int **original, int linhas, int colunas, int tB);
+void escreverImagem(char *nomeArquivo, PIXEL **mat, int linhas, int colunas, int maxValor);
+PIXEL **lerImagem(char *nomeArquivo, int *pLinhas, int *pColunas, int *pMaxValor);
+PIXEL **diminuirContraste(PIXEL **original, int linhas, int colunas, int maxValor);
+PIXEL **aumentarContraste(PIXEL **original, int linhas, int colunas, int maxValor);
+int **adicionaMoldura(PIXEL **original, int linhas, int colunas, int color);
+int **diminuirBrilho(int **original, int linhas, int colunas);
+int **aumentarBrilho(int **original, int linhas, int colunas, int maxValor);
+
+int main(int argc, char *argv[])
+{
+    char opcao[10] = "0";
+    int linhas = 0, colunas = 0, maxValor = 0;
+    PIXEL **mat = NULL;
+    int tamanhoBorrao = 8;
+    char nomeArquivo[100] = "";
+    char nomeArquivoLeitura[100] = "";
+    char nomeArquivoEscrita[100] = "";
+    while (opcao[0] != '11')
+    {
+        printf("\n\nMini-photoshop\n\n");
+        printf("1) Ler imagem\n");
+        printf("2) Gravar imagem\n");
+        printf("3) Aumentar o brilho\n");
+        printf("4) Diminuir o brilho\n");
+        printf("5) Aumentar contraste\n");
+        printf("6) Diminuir contraste\n");
+        printf("7) Desfocar\n");
+        printf("8) Fazer moldura\n");
+        printf("9) Escala em tom de cinza\n");
+        printf("10) Inverter cores\n");
+        printf("11) Sair\n");
+        printf("\nEntre a opcao desejada: ");
+        fgets(opcao, 10, stdin);
+        switch (opcao[0])
+        {
+        case '1':
+            printf("\n\nEntre com o nome da imagem (sem extensao): ");
+            fgets(nomeArquivo, 100, stdin);
+            nomeArquivo[strlen(nomeArquivo) - 1] = '\0';
+            strcpy(nomeArquivoLeitura, nomeArquivo);
+            strcat(nomeArquivoLeitura, ".ppm");
+            mat = lerImagem(nomeArquivoLeitura, &linhas, &colunas, &maxValor);
+            break;
+        case '2':
+            strcpy(nomeArquivoEscrita, nomeArquivo);
+            strcat(nomeArquivoEscrita, "_editada.ppm");
+            printf("\n\nA imagem sera salva como %s\n", nomeArquivoEscrita);
+            escreverImagem(nomeArquivoEscrita, mat, linhas, colunas, maxValor);
+            break;
+        case '3':
+            mat = aumentarBrilho(mat, linhas, colunas, maxValor);
+            break;
+        case '4':
+            mat = diminuirBrilho(mat, linhas, colunas);
+            break;
+        case '5':
+            mat = aumentarContraste(mat, linhas, colunas, maxValor);
+            break;
+        case '6':
+            mat = diminuirContraste(mat, linhas, colunas, maxValor);
+            break;
+        case '7':
+            mat = borrar(mat, linhas, colunas, tamanhoBorrao);
+            break;
+        case '8':
+            int color;
+            printf("\nDigite a cor da moldura: ");
+            printf("\n1 - Preto");
+            printf("\n2 - Branco\n");
+            scanf("%d", &color);
+            mat = moldura(mat, linhas, colunas, maxValor, color);
+            break;
+        case '9':
+            mat = escalaCinza(mat, linhas, colunas);
+            break;
+        case '10':
+            mat = inverteCores(mat, linhas, colunas, maxValor);
+            break;
+        }
+    }
+    return 0;
+}
+
 int **aumentarBrilho(int **original, int linhas, int colunas, int maxValor)
 {
     int l, c;
@@ -110,11 +196,17 @@ int **adicionaMoldura(PIXEL **original, int linhas, int colunas, int color)
     return nova;
 }
 
-void aumentarContraste(PIXEL **original, int linhas, int colunas, int maxValor)
+PIXEL **aumentarContraste(PIXEL **original, int linhas, int colunas, int maxValor)
 {
     int l, c;
     double r, g, b;
     double novo_r, novo_g, novo_b;
+
+    PIXEL **nova;
+    int i;
+    nova = (PIXEL **)malloc(linhas * sizeof(PIXEL *));
+    for (i = 0; i < linhas; i++)
+        nova[i] = (PIXEL *)malloc(colunas * sizeof(PIXEL));
 
     // Transforma cada canal de cor em um valor de ponto flutuante de 0 a 1
     for (l = 0; l < linhas; l++)
@@ -131,18 +223,25 @@ void aumentarContraste(PIXEL **original, int linhas, int colunas, int maxValor)
             novo_b = 1.0 / (1.0 + exp(-(10.0 * b - 5.0)));
 
             // Transforma o resultado de volta para 0..255
-            original[l][c].R = (int)(novo_r * maxValor);
-            original[l][c].G = (int)(novo_g * maxValor);
-            original[l][c].B = (int)(novo_b * maxValor);
+            nova[l][c].R = (int)(novo_r * maxValor);
+            nova[l][c].G = (int)(novo_g * maxValor);
+            nova[l][c].B = (int)(novo_b * maxValor);
         }
     }
+    return nova;
 }
 
-void diminuirContraste(PIXEL **original, int linhas, int colunas, int maxValor)
+PIXEL **diminuirContraste(PIXEL **original, int linhas, int colunas, int maxValor)
 {
     int l, c;
     double r, g, b;
     double novo_r, novo_g, novo_b;
+
+    PIXEL **nova;
+    int i;
+    nova = (PIXEL **)malloc(linhas * sizeof(PIXEL *));
+    for (i = 0; i < linhas; i++)
+        nova[i] = (PIXEL *)malloc(colunas * sizeof(PIXEL));
 
     // Transforma cada canal de cor em um valor de ponto flutuante de 0 a 1
     for (l = 0; l < linhas; l++)
@@ -159,11 +258,12 @@ void diminuirContraste(PIXEL **original, int linhas, int colunas, int maxValor)
             novo_b = 1.0 / (1.0 + exp(2.0 - (10.0 * b - 5.0)));
 
             // Transforma o resultado de volta para 0..255
-            original[l][c].R = (int)(novo_r * maxValor);
-            original[l][c].G = (int)(novo_g * maxValor);
-            original[l][c].B = (int)(novo_b * maxValor);
+            nova[l][c].R = (int)(novo_r * maxValor);
+            nova[l][c].G = (int)(novo_g * maxValor);
+            nova[l][c].B = (int)(novo_b * maxValor);
         }
     }
+    return nova;
 }
 
 PIXEL **lerImagem(char *nomeArquivo, int *pLinhas, int *pColunas, int *pMaxValor)
@@ -292,71 +392,4 @@ PIXEL **inverteCores(PIXEL **original, int linhas, int colunas, int maxValor)
         }
     }
     return nova;
-}
-
-int main(int argc, char *argv[])
-{
-    char opcao[10] = "0";
-    int linhas = 0, colunas = 0, maxValor = 0;
-    PIXEL **mat = NULL;
-    int tamanhoBorrao = 8;
-    char nomeArquivo[100] = "";
-    char nomeArquivoLeitura[100] = "";
-    char nomeArquivoEscrita[100] = "";
-    while (opcao[0] != '9')
-    {
-        printf("\n\nMini-photoshop\n\n");
-        printf("1) Ler imagem\n");
-        printf("2) Gravar imagem\n");
-        printf("3) Aumentar o brilho\n");
-        printf("4) Diminuir o brilho\n");
-        printf("5) Aumentar contraste\n");
-        printf("6) Diminuir contraste\n");
-        printf("7) Desfocar\n");
-        printf("8) Fazer moldura\n");
-        printf("9) Sair\n");
-        printf("\nEntre a opcao desejada: ");
-        fgets(opcao, 10, stdin);
-        switch (opcao[0])
-        {
-        case '1':
-            printf("\n\nEntre com o nome da imagem (sem extensao): ");
-            fgets(nomeArquivo, 100, stdin);
-            nomeArquivo[strlen(nomeArquivo) - 1] = '\0';
-            strcpy(nomeArquivoLeitura, nomeArquivo);
-            strcat(nomeArquivoLeitura, ".ppm");
-            mat = lerImagem(nomeArquivoLeitura, &linhas, &colunas, &maxValor);
-            break;
-        case '2':
-            strcpy(nomeArquivoEscrita, nomeArquivo);
-            strcat(nomeArquivoEscrita, "_editada.ppm");
-            printf("\n\nA imagem sera salva como %s\n", nomeArquivoEscrita);
-            escreverImagem(nomeArquivoEscrita, mat, linhas, colunas, maxValor);
-            break;
-        case '3':
-            aumentarBrilho(mat, linhas, colunas, maxValor);
-            break;
-        case '4':
-            mat = diminuirBrilho(mat, linhas, colunas);
-            break;
-        case '5':
-            aumentarContraste(mat, linhas, colunas, maxValor);
-            break;
-        case '6':
-            diminuirContraste(mat, linhas, colunas, maxValor);
-            break;
-        case '7':
-            mat = borrar(mat, linhas, colunas, tamanhoBorrao);
-            break;
-        case '8':
-            int color;
-            printf("\nDigite a cor da moldura: ");
-            printf("\n1 - Preto");
-            printf("\n2 - Branco\n");
-            scanf("%d", &color);
-            mat = moldura(mat, linhas, colunas, maxValor, color);
-            break;
-        }
-    }
-    return 0;
 }
