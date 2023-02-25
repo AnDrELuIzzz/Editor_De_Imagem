@@ -250,20 +250,48 @@ int **borrar(int **original, int linhas, int colunas, int tB)
     return nova;
 }
 
-void escalaDeCinza(PIXEL **imagem, int linhas, int colunas)
+PIXEL **escalaCinza(PIXEL **original, int linhas, int colunas)
 {
-    int l, c;
-    double gray_value;
-    for (l = 0; l < linhas; l++)
+    // Alocar nova matriz dinamicamente
+    PIXEL **nova = (PIXEL **)malloc(linhas * sizeof(PIXEL *));
+    for (int i = 0; i < linhas; i++)
     {
-        for (c = 0; c < colunas; c++)
+        nova[i] = (PIXEL *)malloc(colunas * sizeof(PIXEL));
+    }
+
+    // Converter cada pixel para escala de cinza
+    for (int i = 0; i < linhas; i++)
+    {
+        for (int j = 0; j < colunas; j++)
         {
-            gray_value = 0.3 * imagem[l][c].R + 0.59 * imagem[l][c].G + 0.11 * imagem[l][c].B;
-            imagem[l][c].R = gray_value;
-            imagem[l][c].G = gray_value;
-            imagem[l][c].B = gray_value;
+            int R = original[i][j].R;
+            int G = original[i][j].G;
+            int B = original[i][j].B;
+            int gray = (int)(0.3 * R + 0.59 * G + 0.11 * B);
+            nova[i][j].R = gray;
+            nova[i][j].G = gray;
+            nova[i][j].B = gray;
         }
     }
+    return nova;
+}
+
+PIXEL **inverteCores(PIXEL **original, int linhas, int colunas, int maxValor)
+{
+    PIXEL **nova;
+    int i, j;
+    nova = (PIXEL **)malloc(linhas * sizeof(PIXEL *));
+    for (i = 0; i < linhas; i++)
+    {
+        nova[i] = (PIXEL *)malloc(colunas * sizeof(PIXEL));
+        for (j = 0; j < colunas; j++)
+        {
+            nova[i][j].R = maxValor - original[i][j].R;
+            nova[i][j].G = maxValor - original[i][j].G;
+            nova[i][j].B = maxValor - original[i][j].B;
+        }
+    }
+    return nova;
 }
 
 int main(int argc, char *argv[])
