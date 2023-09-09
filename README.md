@@ -31,8 +31,7 @@ Este repositório contém um programa em C que oferece funcionalidades semelhant
 
 Sinta-se à vontade para personalizar esta descrição de acordo com as necessidades específicas do seu repositório, destacando os detalhes mais relevantes e incentivando a colaboração de outros desenvolvedores. Certifique-se de que a descrição seja clara e informativa para que os usuários compreendam o propósito do seu projeto e como usá-lo.
 
-# Bibliografia
-Bibliografias utilizadas:
+# Bibliografia utilizadas
 https://fatecpem.blogspot.com/p/manipulador-de-imagens-microphotoshop.html
 https://www.homeandlearn.co.uk/extras/image/image-invert-colors.html
 https://www.tutorialspoint.com/dip/grayscale_to_rgb_conversion.htm
